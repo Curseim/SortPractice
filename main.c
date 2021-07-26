@@ -13,6 +13,7 @@ void Sort_Selection(int *arr);
 void Sort_Insertion(int *arr);
 void Sort_Merge(int *arr, int left, int right);
 void Merge(int *arr, int left, int mid, int right);
+void Sort_Quick(int *arr);
 void Swap(int *a,int *b);
 int Calc_Time(int start, int end);
 int ArrCount(int *arr);
@@ -24,9 +25,9 @@ void main()
 	srand(time(NULL));
 	
 	int count;
-	int timeTaken_Sort_Arr[4];
+	int timeTaken_Sort_Arr[5];
 	
-	printf("»ı¼º ÇÒ ¼öÀÇ °³¼ö ÀÔ·Â > ");
+	printf("ìƒì„± í•  ìˆ˜ì˜ ê°œìˆ˜ ì…ë ¥ > ");
 	scanf("%d", &count);
 	system("cls");
 	
@@ -45,9 +46,9 @@ void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr)
 {
 	int start, end;
 	
-	ArrCpy(arr, arr_cpy);
+/*	ArrCpy(arr, arr_cpy);
 	start = clock();
-	printf("\n\n¹öºí Á¤·Ä °è»ê Áß...\n\n");
+	printf("\n\në²„ë¸” ì •ë ¬ ê³„ì‚° ì¤‘...\n\n");
 	Sort_Bubble(arr_cpy);
 	end = clock();
 	timeTaken_Sort_Arr[0] = Calc_Time(start, end);
@@ -55,7 +56,7 @@ void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr)
 	
 	ArrCpy(arr, arr_cpy);
 	start = clock();
-	printf("\n\n¼±ÅÃ Á¤·Ä °è»ê Áß...\n\n");
+	printf("\n\nì„ íƒ ì •ë ¬ ê³„ì‚° ì¤‘...\n\n");
 	Sort_Selection(arr_cpy);
 	end = clock();
 	timeTaken_Sort_Arr[1] = Calc_Time(start, end);
@@ -63,18 +64,26 @@ void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr)
 	
 	ArrCpy(arr, arr_cpy);	
 	start = clock();
-	printf("\n\n»ğÀÔ Á¤·Ä °è»ê Áß...\n\n");
+	printf("\n\nì‚½ì… ì •ë ¬ ê³„ì‚° ì¤‘...\n\n");
 	Sort_Insertion(arr_cpy);
 	end = clock();
 	timeTaken_Sort_Arr[2] = Calc_Time(start, end);
+	system("cls");														*/
+	
+	ArrCpy(arr, arr_cpy);
+	start = clock();
+	printf("\n\në³‘í•© ì •ë ¬ ê³„ì‚° ì¤‘...\n\n");
+	Sort_Merge(arr_cpy, 0, ArrCount(arr) - 1);
+	end = clock();
+	timeTaken_Sort_Arr[3] = Calc_Time(start, end);
 	system("cls");
 	
 	ArrCpy(arr, arr_cpy);
 	start = clock();
-	printf("\n\nº´ÇÕ Á¤·Ä °è»ê Áß...\n\n");
-	Sort_Merge(arr_cpy, 0, ArrCount(arr) - 1);
+	printf("\n\n  í€µ ì •ë ¬ ê³„ì‚° ì¤‘...\n\n");
+	Sort_Quick(arr_cpy);
 	end = clock();
-	timeTaken_Sort_Arr[3] = Calc_Time(start, end);
+	timeTaken_Sort_Arr[4] = Calc_Time(start, end);
 	system("cls");
 }
 int Calc_Time(int start, int end)
@@ -188,6 +197,10 @@ void Merge(int *arr, int left, int mid, int right)
 	
 	free(sorted); 
 }
+void Sort_Quick(int *arr) 
+{
+	
+}
 void Swap(int *a, int *b) 
 {
 	int temp = *a;
@@ -209,7 +222,7 @@ void PrintDisplay(int *arr, int *timeTaken_Sort_Arr)
 {
 	int line = 0;
 	
-	printf("----------------------------------------------------------------------------------------------------\n");
+/*	printf("----------------------------------------------------------------------------------------------------\n");
 		
 	for (int j = 0; j < ArrCount(arr); j++) 
 	{
@@ -227,25 +240,28 @@ void PrintDisplay(int *arr, int *timeTaken_Sort_Arr)
 		printf("\n");
 	}
 	
-	printf("----------------------------------------------------------------------------------------------------\n"); 	
+	printf("----------------------------------------------------------------------------------------------------\n"); 	*/
 	
-	printf("\n\n   %d °³ÀÇ Á¤·Ä °á°ú\n\n", (_msize(arr) / sizeof(arr[0])));
+	printf("\n\n   %d ê°œì˜ ì •ë ¬ ê²°ê³¼\n\n", (_msize(arr) / sizeof(arr[0])));
 	
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		switch (i) 
 		{
 			case 0 :
-				printf("   ¹öºí Á¤·Ä");
+				printf("   ë²„ë¸” ì •ë ¬");
 				break;
 			case 1 :
-				printf("   ¼±ÅÃ Á¤·Ä");
+				printf("   ì„ íƒ ì •ë ¬");
 				break; 
 			case 2 :
-				printf("   »ğÀÔ Á¤·Ä");
+				printf("   ì‚½ì… ì •ë ¬");
 				break;
 			case 3 :
-				printf("   º´ÇÕ Á¤·Ä");
+				printf("   ë³‘í•© ì •ë ¬");
+				break;
+			case 4 :
+				printf("     í€µ ì •ë ¬");
 				break;
 		}
 		printf(" : %d ms\n", timeTaken_Sort_Arr[i]);
