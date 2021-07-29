@@ -2,19 +2,21 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <conio.h>
+#include <math.h>
 #include <time.h>
 #include <malloc.h>
 #include <process.h>
 #include <windows.h>
 
-int Manager_Input();
+int Manager_Input(int *arr, int *timeTaken_Sort_Arr, int *stat);
 void Manager_SortSelector(int *stat);
 void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr, int *stat);
 void Sort_Bubble(int *arr);
 void Sort_Selection(int *arr);
 void Sort_Insertion(int *arr);
-void Sort_Merge(int *arr, int left, int right);
-void Merge(int *arr, int left, int mid, int right);
+void Sort_Merge(int *arr, int left, int right, int* sorted);
+void Merge(int *arr, int left, int mid, int right, int *sorted);
 void Sort_Quick(int *arr, int left, int right);
 int partition(int *arr, int left, int right);
 void Swap(int *a,int *b);
@@ -27,108 +29,184 @@ void main()
 {
 	srand(time(NULL));	
 	
-	int count, stat[5] = { 1, 1, 1, 1, 1 };
+	int count = 0, stat[5] = { 1, 1, 1, 1, 1 };
 	int timeTaken_Sort_Arr[5];	
+	int *arr = (int *)malloc(sizeof(int) * 1);	
+	int *arr_cpy = (int *)malloc(sizeof(int) * 1);
+	arr[0] = -1;	
 	
 	while (1) 
-	{
+	{	
 		while (count == 0) 
 		{
-			count = Manager_Input();
+			count = Manager_Input(arr, timeTaken_Sort_Arr, stat);
 			
 			if (count == 0) 
 			{
+				arr[0] = -1;
 				Manager_SortSelector(stat);
 			}			
 		}
 		
-		int *arr = (int *)malloc(sizeof(int) * count);
-		int *arr_cpy = (int *)malloc(sizeof(int) * count);
+		arr = realloc(arr, sizeof(int) * count);
+		arr_cpy = realloc(arr_cpy, sizeof(int) * count);
 			
+		printf("\n\n   난수 섞는중...\n\n");
 		for (int i = 0; i < count; i++)
 		{
-			arr[i] = rand() % 1000 + 1;
+			arr[i] = rand() % 1000; 
 		}
-	
+		system("cls");
+
 		Manager_Sort(arr, arr_cpy, timeTaken_Sort_Arr, stat);
 		PrintDisplay(arr_cpy, timeTaken_Sort_Arr, stat);		
 		
 		count = 0;
-		free(arr);
-		free(arr_cpy);
 	}				
 }
-int Manager_Input() 
+int Manager_Input(int *arr, int *timeTaken_Sort_Arr, int *stat) 
 {
-	int count;
+	int count = 0;
+	int select = 0;
+	char count_s[14] = "0";
 	
-	printf("\n\n   [ 0 ] 활성/비활성 정렬 선택\n\n");
-	printf("   생성 할 수의 개수 입력 > ");
-	scanf("%d", &count);
-	system("cls");	
+	while (select != 27) 
+	{
+		system("cls");
+		
+		if (arr[0] != -1)
+		{
+		PrintDisplay(arr, timeTaken_Sort_Arr, stat);			
+		}	
+				
+		printf("\n\n   [ ESC ] 활성/비활성 정렬 선택\n\n");
+		printf("   생성 할 수의 개수 입력 > ");
+		printf("%s", count_s);		
+		
+		select = getch();	
+				
+		if (select == 27) 
+		{
+			count = 0;
+		}
+		else if (count == 0 && select == 13) 
+		{
+			select = 0;
+		}
+		else if (select == 13) 
+		{
+			select = 27;
+		}		
+		else 
+		{
+			if (select == 8) 
+			{
+				count /= 10;
+				strcpy(count_s, itoa(count, count_s, 10));					
+			}
+			else 
+			{
+			count = (count * 10) + (select - 48);		
+			strcpy(count_s, itoa(count, count_s, 10));		
+			}
+		}
+		
+		if (abs(count) > 1000000000) 
+		{
+			count = 1000000000;
+			strcpy(count_s, itoa(count, count_s, 10));
+		}
+		if (strlen(count_s) > 3) 
+		{
+			int i = 0;
+			int length = strlen(count_s);
+			char temp_s;
+			strcpy(temp_s, count_s);
+			strcpy(count_s, "");
+			
+			Sleep(1000);
+			
+			while (length != 0) 
+			{
+				strcat(count_s, temp_s + i);
+				length--;
+				
+				if ((length > 0) && (length % 4 == 3)) 
+				{
+					strcat(count_s, ",");
+				}
+			}
+		}
+	}
 	
+	system("cls");
+		
 	return count;
 }
 void Manager_SortSelector(int *stat) 
 {
-	int select;
+	int select = 0;
 	
-	printf("\n\n   상태\n\n");
-	
-	for (int i = 0; i < 5; i++) 
+	while(select != 27) 
 	{
-		if (stat[i] == 1) 
+		printf("\n\n   상태\n\n");
+		
+		for (int i = 0; i < 5; i++) 
 		{
-			printf("    O    ");
-		} 
-		else if (stat[i] == 0)
-		{
-			printf("    X    ");
+			if (stat[i] == 1) 
+			{
+				printf("    ▣    ");
+			} 
+			else if (stat[i] == 0)
+			{
+				printf("    □    ");
+			}
+			
+			switch (i) 
+			{
+				case 0 :
+					printf("버블 [ 1 ]\n");
+					break;
+				case 1 :
+					printf("선택 [ 2 ]\n");	
+					break;	
+				case 2 :
+					printf("삽입 [ 3 ]\n");	
+					break;	
+				case 3 :
+					printf("병합 [ 4 ]\n");	
+					break;	
+				case 4 :
+					printf("  퀵 [ 5 ]\n");	
+					break;					
+			}		
 		}
 		
-		switch (i) 
-		{
-			case 0 :
-				printf("버블 [ 1 ]\n");
-				break;
+		printf("\n         뒤로 [ ESC ]\n\n");
+		
+		select = getch();
+		
+		switch (select - 48)
+		{						
 			case 1 :
-				printf("선택 [ 2 ]\n");	
-				break;	
+				stat[0] = !stat[0];
+				break;
 			case 2 :
-				printf("삽입 [ 3 ]\n");	
-				break;	
+				stat[1] = !stat[1];
+				break;				
 			case 3 :
-				printf("병합 [ 4 ]\n");	
-				break;	
+				stat[2] = !stat[2];
+				break;				
 			case 4 :
-				printf("  퀵 [ 5 ]\n");	
-				break;					
-		}		
+				stat[3] = !stat[3];
+				break;				
+			case 5 :
+				stat[4] = !stat[4];
+				break;											
+		}
+
+		system("cls");			
 	}
-	printf("\n         뒤로 [ 0 ]\n");
-	printf("\n              > ");
-	scanf("%d", &select);
-	
-	switch (select) 
-	{						
-		case 1 :
-			stat[0] = !stat[0];
-			break;
-		case 2 :
-			stat[1] = !stat[1];
-			break;				
-		case 3 :
-			stat[2] = !stat[2];
-			break;				
-		case 4 :
-			stat[3] = !stat[3];
-			break;				
-		case 5 :
-			stat[4] = !stat[4];
-			break;											
-	}
-	
-	system("cls");	
 }
 void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr, int *stat) 
 {
@@ -138,29 +216,33 @@ void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr, int *stat)
 	{			
 		if (stat[i] == 1)
 		{
+			printf("\n\n   난수 복사중...\n\n");
 			ArrCpy(arr, arr_cpy);
+			system("cls");
 			start = clock();			
 					
 			switch (i)
 			{
 				case 0 :
-					printf("\n\n버블 정렬 계산 중...\n\n");	
+					printf("\n\n   버블 정렬 계산 중...\n\n");	
 					Sort_Bubble(arr_cpy);
 					break;
 				case 1 :
-					printf("\n\n선택 정렬 계산 중...\n\n");
+					printf("\n\n   선택 정렬 계산 중...\n\n");
 					Sort_Selection(arr_cpy);
 					break;
 				case 2 :
-					printf("\n\n삽입 정렬 계산 중...\n\n");
+					printf("\n\n   삽입 정렬 계산 중...\n\n");
 					Sort_Insertion(arr_cpy);
 					break;
 				case 3 :
-					printf("\n\n병합 정렬 계산 중...\n\n");
-					Sort_Merge(arr_cpy, 0, ArrCount(arr) - 1);
+					printf("\n\n   병합 정렬 계산 중...\n\n");
+					int *sorted = (int *)malloc(sizeof(int) * ArrCount(arr));
+					Sort_Merge(arr_cpy, 0, ArrCount(arr) - 1, sorted);
+					free(sorted);
 					break;
 				case 4 :
-					printf("\n\n  퀵 정렬 계산 중...\n\n");
+					printf("\n\n   퀵 정렬 계산 중...\n\n");
 					Sort_Quick(arr_cpy, 0, ArrCount(arr) - 1);
 					break;				
 			}
@@ -224,27 +306,24 @@ void Sort_Insertion(int *arr)
 		arr[i - order] = temp;
 	}
 }
-void Sort_Merge(int *arr, int left, int right)
+void Sort_Merge(int *arr, int left, int right, int *sorted)
 {
 	int mid;
 	
 	if(left<right)
 	{
 	mid = (left+right)/2;
-	Sort_Merge(arr, left, mid);
-	Sort_Merge(arr, mid+1, right);
-	Merge(arr, left, mid, right);
+	Sort_Merge(arr, left, mid, sorted);
+	Sort_Merge(arr, mid+1, right, sorted);
+	Merge(arr, left, mid, right, sorted);
 	}
 }
-void Merge(int *arr, int left, int mid, int right)
+void Merge(int *arr, int left, int mid, int right, int *sorted)
 {
 	int i, j, k, l;
 	i = left;
 	j = mid+1;
 	k = left;
-	
-	int *sorted = (int *)malloc(sizeof(int) * ArrCount(arr));
-	
 
 	while(i<=mid && j<=right)
 	{
@@ -278,8 +357,6 @@ void Merge(int *arr, int left, int mid, int right)
 	{
 		arr[l] = sorted[l];
 	}
-	
-	free(sorted); 
 }
 void Sort_Quick(int *arr, int left, int right)
 {
@@ -348,7 +425,7 @@ void PrintDisplay(int *arr, int *timeTaken_Sort_Arr, int *stat)
 	
 	printf("----------------------------------------------------------------------------------------------------\n"); 	*/
 	
-	printf("\n\n   %d 개의 정렬 결과\n\n", (_msize(arr) / sizeof(arr[0])));
+	printf("\n\n   %d 개의 정렬 결과\n\n", (ArrCount(arr)));
 	
 	for (int i = 0; i < 5; i++)
 	{
