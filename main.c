@@ -8,7 +8,11 @@
 #include <malloc.h>
 #include <process.h>
 #include <windows.h>
+#define LIMITCOUNT 1000000000
 
+CONSOLE_SCREEN_BUFFER_INFO curInfo;
+
+void gotoxy(int x, int y);
 int Manager_Input(int *arr, int *timeTaken_Sort_Arr, int *stat);
 void Manager_SortSelector(int *stat);
 void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr, int *stat);
@@ -26,18 +30,18 @@ void ArrCpy(int *arr, int *arr_cpy);
 void PrintDisplay(int *arr, int *timeTaken_Sort_Arr, int *stat);
 
 void main() 
-{
+{	
 	srand(time(NULL));	
 	
-	int count = 0, stat[5] = { 1, 1, 1, 1, 1 };
+	unsigned int count = 0, stat[5] = { 1, 1, 1, 1, 1 };
 	int timeTaken_Sort_Arr[5];	
 	int *arr = (int *)malloc(sizeof(int) * 1);	
 	int *arr_cpy = (int *)malloc(sizeof(int) * 1);
 	arr[0] = -1;	
 	
 	while (1) 
-	{	
-		while (count == 0) 
+	{
+		while (count == 0)
 		{
 			count = Manager_Input(arr, timeTaken_Sort_Arr, stat);
 			
@@ -54,7 +58,7 @@ void main()
 		printf("\n\n   난수 섞는중...\n\n");
 		for (int i = 0; i < count; i++)
 		{
-			arr[i] = rand() % 1000; 
+			arr[i] = rand();
 		}
 		system("cls");
 
@@ -66,7 +70,7 @@ void main()
 }
 int Manager_Input(int *arr, int *timeTaken_Sort_Arr, int *stat) 
 {
-	int count = 0;
+	unsigned int count = 0;
 	int select = 0;
 	char count_s[14] = "0";
 	
@@ -76,12 +80,15 @@ int Manager_Input(int *arr, int *timeTaken_Sort_Arr, int *stat)
 		
 		if (arr[0] != -1)
 		{
-		PrintDisplay(arr, timeTaken_Sort_Arr, stat);			
+			PrintDisplay(arr, timeTaken_Sort_Arr, stat);			
 		}	
 				
 		printf("\n\n   [ ESC ] 활성/비활성 정렬 선택\n\n");
-		printf("   생성 할 수의 개수 입력 > ");
-		printf("%s", count_s);		
+		printf("   생성 할 수의 개수 입력 ▶ ");
+		printf("%s", count_s);
+		
+//		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
+//		gotoxy(curInfo.dwCursorPosition.X, curInfo.dwCursorPosition.Y);
 		
 		select = getch();	
 				
@@ -106,36 +113,78 @@ int Manager_Input(int *arr, int *timeTaken_Sort_Arr, int *stat)
 			}
 			else 
 			{
-			count = (count * 10) + (select - 48);		
-			strcpy(count_s, itoa(count, count_s, 10));		
+				if (count >= (LIMITCOUNT / 10)) 
+				{
+					count = LIMITCOUNT;
+					strcpy(count_s, itoa(count, count_s, 10));	
+				}
+				else 
+				{
+					count = (count * 10) + (select - 48);		
+					strcpy(count_s, itoa(count, count_s, 10));						
+				}
 			}
 		}
 		
-		if (abs(count) > 1000000000) 
+		if (count > 999) 
 		{
-			count = 1000000000;
-			strcpy(count_s, itoa(count, count_s, 10));
-		}
-		if (strlen(count_s) > 3) 
-		{
-			int i = 0;
-			int length = strlen(count_s);
-			char temp_s;
-			strcpy(temp_s, count_s);
+			unsigned int temp_count = count;	
+			char temp_count_s[4] = "";
+			int dot_count = 0;
 			strcpy(count_s, "");
 			
-			Sleep(1000);
-			
-			while (length != 0) 
+			while ((temp_count / 1000) != 0) 
 			{
-				strcat(count_s, temp_s + i);
-				length--;
-				
-				if ((length > 0) && (length % 4 == 3)) 
-				{
-					strcat(count_s, ",");
-				}
+				temp_count /= 1000;
+				dot_count++;
 			}
+					
+			temp_count = count;
+			
+			for (int i = dot_count; i > 0; i--) 
+			{
+				temp_count /= pow(1000, i);
+				temp_count %= 1000;
+				
+				if (temp_count == 0) 
+				{
+					strcat(count_s, "000");						
+				}
+				else 
+				{
+					if ((strlen(itoa(temp_count, temp_count_s, 10)) < 3) && (i != dot_count))
+					{
+						int zeroCount = 3 - strlen(itoa(temp_count, temp_count_s, 10));
+						
+						for (int j = 0; j < zeroCount; j++) 
+						{
+							strcat(count_s, "0");		
+						}
+						
+						strcat(count_s, itoa(temp_count, temp_count_s, 10));
+					}
+					else 
+					{
+						strcat(count_s, itoa(temp_count, temp_count_s, 10));						
+					}			
+				}
+				
+				strcat(count_s, ",");
+				temp_count = count;
+			}
+			
+			if ((temp_count % 1000) == 0) 
+			{
+				strcat(count_s, "000");		
+			}
+			else 
+			{
+				strcat(count_s, itoa(temp_count % 1000, temp_count_s, 10));				
+			}
+		}
+		else 
+		{
+			strcpy(count_s, itoa(count, count_s, 10));
 		}
 	}
 	
@@ -250,7 +299,9 @@ void Manager_Sort(int *arr, int *arr_cpy, int *timeTaken_Sort_Arr, int *stat)
 			timeTaken_Sort_Arr[i] = Calc_Time(start, end);		
 			system("cls");			
 		}	
-	}			
+	}
+	
+	ArrCpy(arr_cpy, arr);			
 }
 int Calc_Time(int start, int end)
 {
@@ -405,11 +456,13 @@ void PrintDisplay(int *arr, int *timeTaken_Sort_Arr, int *stat)
 {
 	int line = 0;
 	
-/*	printf("----------------------------------------------------------------------------------------------------\n");
+
+	
+/*	printf("------------------------------------------------------------------------------------------------------------------------\n");	
 		
 	for (int j = 0; j < ArrCount(arr); j++) 
 	{
-		printf("%5d", arr[j]);
+		printf("%6d", arr[j]);
 		line++;
 		
 		if (line >= 20) 
@@ -423,7 +476,7 @@ void PrintDisplay(int *arr, int *timeTaken_Sort_Arr, int *stat)
 		printf("\n");
 	}
 	
-	printf("----------------------------------------------------------------------------------------------------\n"); 	*/
+	printf("------------------------------------------------------------------------------------------------------------------------\n"); 	 */
 	
 	printf("\n\n   %d 개의 정렬 결과\n\n", (ArrCount(arr)));
 	
@@ -456,5 +509,11 @@ void PrintDisplay(int *arr, int *timeTaken_Sort_Arr, int *stat)
 			printf(" :       ms\n");		
 		}
 	}
-
 }
+void gotoxy(int x, int y)
+{
+    COORD Pos;
+    Pos.X = x;
+    Pos.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
+} 
