@@ -27,6 +27,7 @@ void Sort_Heap(short *arr);
 void Swap(short *a,short *b);
 int Calc_Time(int start, int end);
 const char *Calc_ReqMem(int count, int *stat);
+const char *Calc_Comma000(int count);
 int ArrCount(short *arr);
 void ArrCpy(short *arr, short *arr_cpy);
 void PrintDisplay(short *arr, int *timeTaken_Sort_Arr, int *stat);
@@ -40,14 +41,14 @@ void main()
 
 	srand(time(NULL));	
 	
-	unsigned int count = 0, stat[5] = { 0, 0, 0, 1, 0 };
+	unsigned int count = 0, stat[5] = { 1, 1, 1, 1, 1 };
 	int timeTaken_Sort_Arr[5];		
 	short *arr = (short *)malloc(sizeof(short) * 1);
 	arr[0] = -1;	
 	
 	while (1) 
 	{		
-/*		while (count == 0)
+		while (count == 0)
 		{
 			count = Manager_Input(arr, timeTaken_Sort_Arr, stat);
 			
@@ -56,8 +57,7 @@ void main()
 				arr[0] = -1;
 				Manager_SortSelector(stat);
 			}			
-		}*/
-		count = 100000000;
+		}
 		arr = realloc(arr, sizeof(short) * count);
 		short *arr_cpy = (short *)malloc(sizeof(short) * count);
 			
@@ -141,63 +141,11 @@ int Manager_Input(short *arr, int *timeTaken_Sort_Arr, int *stat)
 		
 		if (count > 999) 
 		{
-			unsigned int temp_count = count;	
-			char temp_count_s[4] = "";
-			int dot_count = 0;
-			strcpy(count_s, "");
-			
-			while ((temp_count / 1000) != 0) 
-			{
-				temp_count /= 1000;
-				dot_count++;
-			}
-					
-			temp_count = count;
-			
-			for (int i = dot_count; i > 0; i--) 
-			{
-				temp_count /= pow(1000, i);
-				temp_count %= 1000;
-				
-				if (temp_count == 0) 
-				{
-					strcat(count_s, "000");						
-				}
-				else 
-				{
-					if ((strlen(itoa(temp_count, temp_count_s, 10)) < 3) && (i != dot_count))
-					{
-						int zeroCount = 3 - strlen(itoa(temp_count, temp_count_s, 10));
-						
-						for (int j = 0; j < zeroCount; j++) 
-						{
-							strcat(count_s, "0");		
-						}
-						
-						strcat(count_s, itoa(temp_count, temp_count_s, 10));
-					}
-					else 
-					{
-						strcat(count_s, itoa(temp_count, temp_count_s, 10));						
-					}			
-				}
-				
-				strcat(count_s, ",");
-				temp_count = count;
-			}
-			
-			if ((temp_count % 1000) == 0) 
-			{
-				strcat(count_s, "000");		
-			}
-			else 
-			{
-				strcat(count_s, itoa(temp_count % 1000, temp_count_s, 10));				
-			}
-		}
+			strcpy(count_s, Calc_Comma000(count));
+		}           
 		else 
 		{
-			strcpy(count_s, itoa(count, count_s, 10));
+			strcpy(count_s, itoa(count, count_s, 10));				
 		}
 	}
 	
@@ -363,6 +311,72 @@ const char *Calc_ReqMem(int count_Int, int *stat)
 		strcat(count_s, " Byte");
 	}
 
+	return count_s;
+}
+const char *Calc_Comma000(int count) 
+{
+	static char count_s[14];
+	
+	unsigned int temp_count = count;	
+	char temp_count_s[4] = "";
+	int dot_count = 0;
+	strcpy(count_s, "");
+		
+	while ((temp_count / 1000) != 0) 
+	{
+		temp_count /= 1000;
+		dot_count++;
+	}
+			
+	temp_count = count;
+	
+	for (int i = dot_count; i > 0; i--) 
+	{
+		temp_count /= pow(1000, i);
+		temp_count %= 1000;
+		
+		if (temp_count == 0) 
+		{
+			strcat(count_s, "000");						
+		}
+		else 
+		{
+			if ((strlen(itoa(temp_count, temp_count_s, 10)) < 3) && (i != dot_count))
+			{
+				int zeroCount = 3 - strlen(itoa(temp_count, temp_count_s, 10));
+				
+				for (int j = 0; j < zeroCount; j++) 
+				{
+					strcat(count_s, "0");		
+				}
+				
+				strcat(count_s, itoa(temp_count, temp_count_s, 10));
+			}
+			else 
+			{
+				strcat(count_s, itoa(temp_count, temp_count_s, 10));						
+			}			
+		}
+		
+		strcat(count_s, ",");
+		temp_count = count;
+	}
+	
+	if ((temp_count % 1000) == 0) 
+	{
+		strcat(count_s, "000");
+	}
+	else 
+	{
+		int zeroCount = 3 - strlen(itoa(temp_count % 1000, temp_count_s, 10));
+		
+		for (int i = 0; i < zeroCount; i++)
+		{
+			strcat(count_s, "0");
+		}	
+		strcat(count_s, itoa(temp_count % 1000, temp_count_s, 10));			
+	}
+	
 	return count_s;
 }
 void Sort_Bubble(short *arr, int count)
@@ -544,7 +558,7 @@ void PrintDisplay(short *arr, int *timeTaken_Sort_Arr, int *stat)
 	
 	printf("------------------------------------------------------------------------------------------------------------------------\n"); 	 */
 	
-	printf("\n\n   %d 개의 정렬 결과\n\n", (ArrCount(arr)));
+	printf("\n\n   %s 개의 정렬 결과\n\n", Calc_Comma000(ArrCount(arr)));
 	
 	for (int i = 0; i < 5; i++)
 	{
