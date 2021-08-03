@@ -13,24 +13,24 @@
 CONSOLE_SCREEN_BUFFER_INFO curInfo;
 
 void gotoxy(int x, int y);
-int Manager_Input(short *arr, int *timeTaken_Sort_Arr, int *stat);
-void Manager_SortSelector(int *stat);
-void Manager_Sort(short *arr, short *arr_cpy, int *timeTaken_Sort_Arr, int *stat);
-void Sort_Bubble(short *arr, int count);
-void Sort_Selection(short *arr, int count);
-void Sort_Insertion(short *arr, int count);
-void Sort_Merge(short *arr, int left, int right, short* sorted);
-void Merge(short *arr, int left, int mid, int right, short *sorted);
-void Sort_Quick(short *arr, int left, int right);
-int partition(short *arr, int left, int right);
-void Sort_Heap(short *arr);
+int Manager_Input(short arr[], int timeTaken_Sort_Arr[], int stat[]);
+void Manager_SortSelector(int stat[]);
+void Manager_Sort(short arr[], short arr_cpy[], int timeTaken_Sort_Arr[], int stat[]);
+void Sort_Bubble(short arr[], int count);
+void Sort_Selection(short arr[], int count);
+void Sort_Insertion(short arr[], int count);
+void Sort_Merge(short arr[], int left, int right, short* sorted);
+void Merge(short arr[], int left, int mid, int right, short *sorted);
+void Sort_Quick(short arr[], int left, int right);
+int partition(short arr[], int left, int right);
+void Sort_Heap(short arr[]);
 void Swap(short *a,short *b);
 int Calc_Time(int start, int end);
-const char *Calc_ReqMem(int count, int *stat);
+const char *Calc_ReqMem(int count, int stat[]);
 const char *Calc_Comma000(int count);
-int ArrCount(short *arr);
-void ArrCpy(short *arr, short *arr_cpy);
-void PrintDisplay(short *arr, int *timeTaken_Sort_Arr, int *stat);
+int ArrCount(short arr[]);
+void ArrCpy(short arr[], short arr_cpy[]);
+void PrintDisplay(short arr[], int timeTaken_Sort_Arr[], int stat[]);
 
 void main() 
 {	
@@ -80,7 +80,7 @@ void main()
 		count = 0;
 	}				
 }
-int Manager_Input(short *arr, int *timeTaken_Sort_Arr, int *stat) 
+int Manager_Input(short arr[], int timeTaken_Sort_Arr[], int stat[]) 
 {
 	unsigned int count = 0;
 	int select = 0;
@@ -153,7 +153,7 @@ int Manager_Input(short *arr, int *timeTaken_Sort_Arr, int *stat)
 		
 	return count;
 }
-void Manager_SortSelector(int *stat) 
+void Manager_SortSelector(int stat[]) 
 {
 	int select = 0;
 	
@@ -218,7 +218,7 @@ void Manager_SortSelector(int *stat)
 		system("cls");			
 	}
 }
-void Manager_Sort(short *arr, short *arr_cpy, int *timeTaken_Sort_Arr, int *stat) 
+void Manager_Sort(short arr[], short arr_cpy[], int timeTaken_Sort_Arr[], int stat[]) 
 {
 	int start, end;
 	
@@ -266,7 +266,7 @@ int Calc_Time(int start, int end)
 {
 	return end - start;
 }
-const char *Calc_ReqMem(int count_Int, int *stat)
+const char *Calc_ReqMem(int count_Int, int stat[])
 {
 	static char count_s[16];
 	
@@ -379,7 +379,7 @@ const char *Calc_Comma000(int count)
 	
 	return count_s;
 }
-void Sort_Bubble(short *arr, int count)
+void Sort_Bubble(short arr[], int count)
 {	
 	for (int i = 0; i < count; i++) 
 	{
@@ -394,7 +394,7 @@ void Sort_Bubble(short *arr, int count)
 		}	
 	}
 }
-void Sort_Selection(short *arr, int count)
+void Sort_Selection(short arr[], int count)
 {
 	for (int i = 0; i < count; i++) 
 	{
@@ -416,7 +416,7 @@ void Sort_Selection(short *arr, int count)
 		}
 	}
 }
-void Sort_Insertion(short *arr, int count) 
+void Sort_Insertion(short arr[], int count) 
 {
 	for (int i = 1; i < count; i++) 
 	{
@@ -433,7 +433,7 @@ void Sort_Insertion(short *arr, int count)
 		arr[i - order] = temp;
 	}
 }
-void Sort_Merge(short *arr, int left, int right, short *sorted)
+void Sort_Merge(short arr[], int left, int right, short *sorted)
 {
 	int mid;
 	
@@ -445,7 +445,7 @@ void Sort_Merge(short *arr, int left, int right, short *sorted)
 	Merge(arr, left, mid, right, sorted);
 	}
 }
-void Merge(short *arr, int left, int mid, int right, short *sorted)
+void Merge(short arr[], int left, int mid, int right, short *sorted)
 {
 	int i, j, k, l;
 	i = left;
@@ -485,7 +485,7 @@ void Merge(short *arr, int left, int mid, int right, short *sorted)
 		arr[l] = sorted[l];
 	}
 }
-void Sort_Quick(short *arr, int left, int right)
+void Sort_Quick(short arr[], int left, int right)
 {
   if (left < right)
   {
@@ -495,7 +495,7 @@ void Sort_Quick(short *arr, int left, int right)
     Sort_Quick(arr, p + 1, right);
   }
 }
-int partition(short *arr, int left, int right)
+int partition(short arr[], int left, int right)
 {
 	int pivot = arr[right];
 	int i = (left - 1);
@@ -511,7 +511,7 @@ int partition(short *arr, int left, int right)
 	Swap(&arr[i + 1], &arr[right]);
 	return (i + 1);
 }
-void Sort_Heap(short *arr) 
+void Sort_Heap(short arr[]) 
 {
 	
 }
@@ -521,18 +521,18 @@ void Swap(short *a, short *b)
 	*a = *b;
 	*b = temp;
 }
-int ArrCount(short *arr) 
+int ArrCount(short arr[]) 
 {
 	return (_msize(arr) / sizeof(arr[0]));
 }
-void ArrCpy(short *arr, short *arr_cpy) 
+void ArrCpy(short arr[], short arr_cpy[]) 
 {
 	for (int i = 0; i < ArrCount(arr); i++)
 	{
 		arr_cpy[i] = arr[i];
 	}
 }
-void PrintDisplay(short *arr, int *timeTaken_Sort_Arr, int *stat)
+void PrintDisplay(short arr[], int timeTaken_Sort_Arr[], int stat[])
 {
 	int line = 0;
 	
