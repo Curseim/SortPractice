@@ -12,15 +12,14 @@
 
 CONSOLE_SCREEN_BUFFER_INFO curInfo;
 
-void gotoxy(int x, int y);
 int Manager_Input(short arr[], int timeTaken_Sort_Arr[], int stat[]);
 void Manager_SortSelector(int stat[]);
 void Manager_Sort(short arr[], short arr_cpy[], int timeTaken_Sort_Arr[], int stat[]);
 void Sort_Bubble(short arr[], int count);
 void Sort_Selection(short arr[], int count);
 void Sort_Insertion(short arr[], int count);
-void Sort_Merge(short arr[], int left, int right, short* sorted);
-void Merge(short arr[], int left, int mid, int right, short *sorted);
+void Sort_Merge(short arr[], int left, int right, short sorted[]);
+void Merge(short arr[], int left, int mid, int right, short sorted[]);
 void Sort_Quick(short arr[], int left, int right);
 int partition(short arr[], int left, int right);
 void Sort_Heap(short arr[]);
@@ -31,18 +30,19 @@ const char *Calc_Comma000(int count);
 int ArrCount(short arr[]);
 void ArrCpy(short arr[], short arr_cpy[]);
 void PrintDisplay(short arr[], int timeTaken_Sort_Arr[], int stat[]);
+void gotoxy(int x, int y);
 
 void main() 
 {	
     CONSOLE_CURSOR_INFO cursorInfo = { 0, };
     cursorInfo.dwSize = 1; //커서 굵기 (1 ~ 100)
-    cursorInfo.bVisible = FALSE; //커서 Visible TRUE(보임) FALSE(숨김)
+    cursorInfo.bVisible = 0; //커서 Visible TRUE(보임) FALSE(숨김)
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 
 	srand(time(NULL));	
 	
-	unsigned int count = 0, stat[5] = { 1, 1, 1, 1, 1 };
-	int timeTaken_Sort_Arr[5];		
+	unsigned int count = 0, stat[6] = { 1, 1, 1, 1, 1, 1 };
+	int timeTaken_Sort_Arr[6];		
 	short *arr = (short *)malloc(sizeof(short) * 1);
 	arr[0] = -1;	
 	
@@ -100,6 +100,19 @@ int Manager_Input(short arr[], int timeTaken_Sort_Arr[], int stat[])
 		printf("%s", count_s);
 		printf("\n\n     요구되는 메모리 용량 ▷ %s\n\n", Calc_ReqMem(count, stat));
 		
+		int statBool = 0;
+		for (int i = 0; i < 6; i++) 
+		{
+			if (stat[i] == 1)
+			{
+				statBool++;
+			}
+		}
+		if (statBool == 0) 
+		{
+			printf("\n\n     !! 실행 할 배열이 설정되지 않았습니다 !!");
+		}
+		
 //		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &curInfo);
 //		gotoxy(curInfo.dwCursorPosition.X, curInfo.dwCursorPosition.Y);
 		
@@ -139,14 +152,7 @@ int Manager_Input(short arr[], int timeTaken_Sort_Arr[], int stat[])
 			}
 		}
 		
-		if (count > 999) 
-		{
-			strcpy(count_s, Calc_Comma000(count));
-		}           
-		else 
-		{
-			strcpy(count_s, itoa(count, count_s, 10));				
-		}
+		strcpy(count_s, Calc_Comma000(count));   
 	}
 	
 	system("cls");
@@ -161,7 +167,7 @@ void Manager_SortSelector(int stat[])
 	{
 		printf("\n\n   상태\n\n");
 		
-		for (int i = 0; i < 5; i++) 
+		for (int i = 0; i < 6; i++) 
 		{
 			if (stat[i] == 1) 
 			{
@@ -188,6 +194,9 @@ void Manager_SortSelector(int stat[])
 					break;	
 				case 4 :
 					printf("  퀵 [ 5 ]\n");	
+					break;
+				case 5 :
+					printf("  힙 [ 6 ]\n");	
 					break;					
 			}		
 		}
@@ -212,7 +221,10 @@ void Manager_SortSelector(int stat[])
 				break;				
 			case 5 :
 				stat[4] = !stat[4];
-				break;											
+				break;
+			case 6 :
+				stat[5] = !stat[5];
+				break;										
 		}
 
 		system("cls");			
@@ -222,7 +234,7 @@ void Manager_Sort(short arr[], short arr_cpy[], int timeTaken_Sort_Arr[], int st
 {
 	int start, end;
 	
-	for (int i = 0; i < 5; i++) 
+	for (int i = 0; i < 6; i++) 
 	{			
 		if (stat[i] == 1)
 		{
@@ -254,7 +266,11 @@ void Manager_Sort(short arr[], short arr_cpy[], int timeTaken_Sort_Arr[], int st
 				case 4 :
 					printf("\n\n   퀵 정렬 계산 중...\n\n");
 					Sort_Quick(arr_cpy, 0, ArrCount(arr) - 1);
-					break;				
+					break;
+				case 5 :
+					printf("\n\n   힙 정렬 계산 중...\n\n");
+					Sort_Heap(arr_cpy);
+					break;			
 			}
 			end = clock();
 			timeTaken_Sort_Arr[i] = Calc_Time(start, end);		
@@ -315,69 +331,79 @@ const char *Calc_ReqMem(int count_Int, int stat[])
 }
 const char *Calc_Comma000(int count) 
 {
-	static char count_s[14];
-	
-	unsigned int temp_count = count;	
-	char temp_count_s[4] = "";
-	int dot_count = 0;
-	strcpy(count_s, "");
-		
-	while ((temp_count / 1000) != 0) 
+	if (count > 999) 
 	{
-		temp_count /= 1000;
-		dot_count++;
-	}
+		static char count_s[14];
+		
+		unsigned int temp_count = count;	
+		char temp_count_s[4] = "";
+		int dot_count = 0;
+		strcpy(count_s, "");
 			
-	temp_count = count;
-	
-	for (int i = dot_count; i > 0; i--) 
-	{
-		temp_count /= pow(1000, i);
-		temp_count %= 1000;
-		
-		if (temp_count == 0) 
+		while ((temp_count / 1000) != 0) 
 		{
-			strcat(count_s, "000");						
+			temp_count /= 1000;
+			dot_count++;
 		}
-		else 
+				
+		temp_count = count;
+		
+		for (int i = dot_count; i > 0; i--) 
 		{
-			if ((strlen(itoa(temp_count, temp_count_s, 10)) < 3) && (i != dot_count))
+			temp_count /= pow(1000, i);
+			temp_count %= 1000;
+			
+			if (temp_count == 0) 
 			{
-				int zeroCount = 3 - strlen(itoa(temp_count, temp_count_s, 10));
-				
-				for (int j = 0; j < zeroCount; j++) 
-				{
-					strcat(count_s, "0");		
-				}
-				
-				strcat(count_s, itoa(temp_count, temp_count_s, 10));
+				strcat(count_s, "000");						
 			}
 			else 
 			{
-				strcat(count_s, itoa(temp_count, temp_count_s, 10));						
-			}			
+				if ((strlen(itoa(temp_count, temp_count_s, 10)) < 3) && (i != dot_count))
+				{
+					int zeroCount = 3 - strlen(itoa(temp_count, temp_count_s, 10));
+					
+					for (int j = 0; j < zeroCount; j++) 
+					{
+						strcat(count_s, "0");		
+					}
+					
+					strcat(count_s, itoa(temp_count, temp_count_s, 10));
+				}
+				else 
+				{
+					strcat(count_s, itoa(temp_count, temp_count_s, 10));						
+				}			
+			}
+			
+			strcat(count_s, ",");
+			temp_count = count;
 		}
 		
-		strcat(count_s, ",");
-		temp_count = count;
-	}
-	
-	if ((temp_count % 1000) == 0) 
-	{
-		strcat(count_s, "000");
+		if ((temp_count % 1000) == 0) 
+		{
+			strcat(count_s, "000");
+		}
+		else 
+		{
+			int zeroCount = 3 - strlen(itoa(temp_count % 1000, temp_count_s, 10));
+			
+			for (int i = 0; i < zeroCount; i++)
+			{
+				strcat(count_s, "0");
+			}	
+			strcat(count_s, itoa(temp_count % 1000, temp_count_s, 10));			
+		}
+		
+		return count_s;		
 	}
 	else 
 	{
-		int zeroCount = 3 - strlen(itoa(temp_count % 1000, temp_count_s, 10));
+		static char count_s[4];
+		strcpy(count_s, itoa(count, count_s, 10));
 		
-		for (int i = 0; i < zeroCount; i++)
-		{
-			strcat(count_s, "0");
-		}	
-		strcat(count_s, itoa(temp_count % 1000, temp_count_s, 10));			
+		return count_s;
 	}
-	
-	return count_s;
 }
 void Sort_Bubble(short arr[], int count)
 {	
@@ -433,7 +459,7 @@ void Sort_Insertion(short arr[], int count)
 		arr[i - order] = temp;
 	}
 }
-void Sort_Merge(short arr[], int left, int right, short *sorted)
+void Sort_Merge(short arr[], int left, int right, short sorted[])
 {
 	int mid;
 	
@@ -445,7 +471,7 @@ void Sort_Merge(short arr[], int left, int right, short *sorted)
 	Merge(arr, left, mid, right, sorted);
 	}
 }
-void Merge(short arr[], int left, int mid, int right, short *sorted)
+void Merge(short arr[], int left, int mid, int right, short sorted[])
 {
 	int i, j, k, l;
 	i = left;
@@ -513,7 +539,45 @@ int partition(short arr[], int left, int right)
 }
 void Sort_Heap(short arr[]) 
 {
+	arr = realloc(arr, _msize(arr) + sizeof(short));
+	arr[ArrCount(arr) - 1] = arr[0];
 	
+	int i = ArrCount(arr) - 1;
+	int maxHeap = ArrCount(arr) - 1;
+	
+	while (maxHeap != 1)
+	{
+		int i = maxHeap / 2;		
+		while (i > 1)
+		{
+			if (arr[i] < arr[i * 2]) 
+			{
+				int temp = arr[i];
+				arr[i] = arr[i * 2];
+				arr[i * 2] = temp;
+			}
+			if (maxHeap > (i * 2)) 
+			{
+				if (arr[i] < arr[(i * 2) + 1]) 
+				{
+					int temp = arr[i];
+					arr[i] = arr[(i * 2) + 1];
+					arr[(i * 2) + 1] = temp;
+				}
+			}
+			
+			i--;
+		}
+		Swap(&arr[1], &arr[maxHeap]);
+		maxHeap--;
+	}
+	
+	maxHeap = ArrCount(arr);
+	for (int i = 1; i < maxHeap; i++) 
+	{
+		arr[i - 1] = arr[i];
+	}
+	arr = realloc(arr, _msize(arr) - sizeof(short));
 }
 void Swap(short *a, short *b)
 {
@@ -540,27 +604,27 @@ void PrintDisplay(short arr[], int timeTaken_Sort_Arr[], int stat[])
 	
 /*	printf("------------------------------------------------------------------------------------------------------------------------\n");	
 		
-	for (int j = 0; j < ArrCount(arr); j++) 
+	for (int j = 0; j < ArrCount(arr); j++)
 	{
 		printf("%6d", arr[j]);
 		line++;
 		
-		if (line >= 20) 
+		if (line >= 20)
 		{
 			printf("\n");
 			line = 0;
 		}
 	}
-	if (line != 0) 
+	if (line != 0)
 	{
 		printf("\n");
 	}
 	
 	printf("------------------------------------------------------------------------------------------------------------------------\n"); 	 */
-	
+	 
 	printf("\n\n   %s 개의 정렬 결과\n\n", Calc_Comma000(ArrCount(arr)));
 	
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		switch (i) 
 		{
@@ -578,6 +642,9 @@ void PrintDisplay(short arr[], int timeTaken_Sort_Arr[], int stat[])
 				break;
 			case 4 :
 				printf("     퀵 정렬");
+				break;
+			case 5 :
+				printf("     힙 정렬");
 				break;
 		}
 		if (stat[i] == 1) 
